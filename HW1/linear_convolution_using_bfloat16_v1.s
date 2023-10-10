@@ -1,13 +1,18 @@
+# This code only includes the implenetation of fp32_to_bf16 and test cases to ensure the program works as expect.
+# The other parts of linear convolution by using bfloat16 have not yet been finished.
+# because I'm stuck in implementing bfloat16 multiplication and addition myself.
+# I will try to complete it as soon as possible.
+
 .data
-    test1: .word 0x00000000     # exp=0 & man=0
-    test2: .word 0x7F800000     # exp=0x7F800000
+    test1: .word 0x0            # exponent=0x0 & mantissa=0x0
+    test2: .word 0x7F800000     # exponent=0xFF
     test3: .word 0x700AB000     # normalized positive number
     test4: .word 0xF00AB000     # normalized negative number
     test5: .word 0x707F8FFF     # normalized number with overflow after rounding to nearest
     exp_mask: .word 0x7F800000
-    man_mask: .word 0x007FFFFF
-    round: .word 8000
-    bfloat16_man_plus_one_mask: .word 0x007F8000
+    man_mask: .word 0x7FFFFF
+    round: .word 0x8000
+    bfloat16_man_plus_one_mask: .word 0x7F8000
     bfloat16_mask: .word 0xFFFF0000
     msg_before_str: .string "before convert to bfloat16: "
     msg_after_str: .string "after convert to bfloat16: "
@@ -94,8 +99,6 @@ exp_is_zero:
     bne t1, zero, normalized_number   # if t1!=0, t0 is normalized number
     j return_fp32_to_bf16             # else, t0 is zero, just return it
 
-# if mantissa & the most left bit of its right bits are all 1
-# doing round to nearest will cause overflow, so I do round down instead 
 is_overflow:
     lw t1, bfloat16_mask
     and a0, t0, t1                    # do round down

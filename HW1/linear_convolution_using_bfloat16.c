@@ -44,8 +44,8 @@ float* convolution_with_bf16(float* signal, float* impulse, int sLen, int implus
     float* output = (float*) malloc(sizeof(float)*l);
 
     /* convert signal from FP32 format to BF16 format */
-    // fp32_to_bf16_in_arr(signal, sLen);
-    // fp32_to_bf16_in_arr(impulse, impluseLen);
+    fp32_to_bf16_in_arr(signal, sLen);
+    fp32_to_bf16_in_arr(impulse, impluseLen);
 
     /* do linear convolution */
     for(int n=0; n<l; n++) {
