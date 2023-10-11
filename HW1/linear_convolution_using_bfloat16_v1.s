@@ -4,15 +4,12 @@
 # I will try to complete it as soon as possible.
 
 .data
-    test1: .word 0x0            # exponent=0x0 & mantissa=0x0
-    test2: .word 0x7F800000     # exponent=0xFF
-    test3: .word 0x700AB000     # normalized positive number
-    test4: .word 0xF00AB000     # normalized negative number
-    test5: .word 0x707F8FFF     # normalized number with overflow after rounding to nearest
+    test: .word 0x00000000 0x7F800000 0x700AB000 0xF00AB000 0x707F8FFF
+            # exp=0 & man=0 | exp=0x7F800000 | normalized positive number | normalized negative number | normalized number with overflow after rounding to nearest
     exp_mask: .word 0x7F800000
-    man_mask: .word 0x7FFFFF
-    round: .word 0x8000
-    bfloat16_man_plus_one_mask: .word 0x7F8000
+    man_mask: .word 0x007FFFFF
+    round: .word 8000
+    bfloat16_man_plus_one_mask: .word 0x007F8000
     bfloat16_mask: .word 0xFFFF0000
     msg_before_str: .string "before convert to bfloat16: "
     msg_after_str: .string "after convert to bfloat16: "
@@ -20,17 +17,18 @@
 
 .text
 main:
-    lw a0, test1
-    jal do_fp32_to_bf16_and_print
-    lw a0, test2
-    jal do_fp32_to_bf16_and_print
-    lw a0, test3
-    jal do_fp32_to_bf16_and_print
-    lw a0, test4
-    jal do_fp32_to_bf16_and_print
-    lw a0, test5
-    jal do_fp32_to_bf16_and_print
-    
+    la s0, test
+    li s1, 0                          # i
+    li s2, 5                          # n
+test_loop:
+    beq s1, s2, exit                  # if i==5 break
+    lw a0, 0(s0)                      # a0: test[i]
+    jal do_fp32_to_bf16_and_print     
+    addi s0, s0, 4                    # s0: address of test[i+1]
+    addi s1, s1, 1                    # s1: i++
+    j test_loop
+
+exit:   
     li a7, 10                         # exit
     ecall
     
