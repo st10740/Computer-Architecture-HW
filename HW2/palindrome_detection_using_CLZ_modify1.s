@@ -1,15 +1,15 @@
 .text
 .global main
 main:
-    li a0, 0b10001
-    li a1, 0b0
+    li a0, 0x00000003
+    li a1, 0x00000C00
     jal ra, count_leading_zeros
 
     # check is palindrome or not
     li a2, 64
     sub a2, a2, a0
-    li a0, 0b10001
-    li a1, 0b0
+    li a0, 0x00000003
+    li a1, 0x00000C00
     jal ra, palindrome_detected
     addi a7, zero, 1
     ecall
@@ -149,12 +149,12 @@ palindrome_detected:
     mv t0, a1         # high 32 bits
     
     andi t5, a2, 0x1  # t5 = (input number is odd) ? 1 : 0
-    srai s0, a2, 1    # s0 = input bit number / 2
-    add s0, s0, t5    # s0 = input bit number / 2 + checkEven
+    srai t4, a2, 1    # t4 = input bit number / 2
+    add t4, t4, t5    # t4 = input bit number / 2 + checkEven
     
     # x >> (input bit number / 2 + checkEven)
     li t5, 32
-    sub t4, t5, s0    # t4 = 32 - t4
+    sub t4, t5, t4    # t4 = 32 - t4
     sll t2, t0, t4
     sub t4, t5, t4    # (32 - t4) back to t4
     srl t3, t1, t4
@@ -162,13 +162,14 @@ palindrome_detected:
     
     li t2, 0          # t2 = reversed right half of input number
     li t5, 0          # t5 = i 
+    srai t4, a2, 1    # t4 = input bit number / 2
     reverse_loop:
-        srl t6, t3, t5
+        srl t6, t1, t5
         andi t6, t6, 1
         slli t2, t2, 1
         or t2, t2, t6
         addi t5, t5, 1 # i++
-        blt t5, s0, reverse_loop
+        blt t5, t4, reverse_loop
     
     # compare different
     beq t2, t3, isPalindrome

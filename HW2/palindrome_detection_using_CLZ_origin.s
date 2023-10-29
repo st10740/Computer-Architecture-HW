@@ -1,15 +1,15 @@
 .text
 .global main
 main:
-    li a0, 0b10001
-    li a1, 0b0
+    li a0, 0x00000003
+    li a1, 0x00000C00
     jal ra, count_leading_zeros
 
     # check is palindrome or not
     li a2, 64
     sub a2, a2, a0
-    li a0, 0b10001
-    li a1, 0b0
+    li a0, 0x00000003
+    li a1, 0x00000C00
     jal ra, palindrome_detected
     addi a7, zero, 1
     ecall
