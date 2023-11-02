@@ -1,6 +1,15 @@
+.set STDOUT, 1
+.set WRITE, 64
+.set EXIT, 93
+
 .text
-.global main
-main:
+.global palindrome_detection_modify2
+.type palindrome_detection_modify2, %function
+
+palindrome_detection_modify2:
+    addi sp, sp, -4
+    sw ra, 0(sp)
+    
     li a0, 0x00000003
     li a1, 0x00000C00
     jal ra, count_leading_zeros
@@ -11,13 +20,15 @@ main:
     li a0, 0x00000003
     li a1, 0x00000C00
     jal ra, palindrome_detected
-    addi a7, zero, 1
-    ecall
-    
-    # Exit program
-    addi a7, zero, 10
-    ecall
+    # li a7, 1
+    # ecall
 
+    # Exit program
+    lw ra, 0(sp)
+    addi sp, sp, 4
+    ret
+
+    
 count_leading_zeros:
     addi sp, sp, -4 
     sw ra, 0(sp)
@@ -160,32 +171,26 @@ palindrome_detected:
     srl t3, t1, t4
     or t3, t2, t3     # t3 = left half of input number
     
-    # t2 = reversed number
     li t2, 0          # t2 = reversed right half of input number
-    li t5, 0          # t5 = i
-    li t0, 32
-    reverse_loop:
-        srl t6, t3, t5
+    li t5, 0          # t5 = i 
+    srai t4, a2, 1    # t4 = input bit number / 2
+    
+    # Loop unrolling: Unroll the loop 2 times
+    reverse_2_loop:
+        srl t6, t1, t5
         andi t6, t6, 1
         slli t2, t2, 1
         or t2, t2, t6
         addi t5, t5, 1 # i++
-        blt t5, t0, reverse_loop
-
-    li t5,2
-    li t3, 32
-    srai t5, a2, 1
-    sub t5, t3, t5
-    srl t2, t2, t5
+        
+        srl t6, t1, t5
+        andi t6, t6, 1
+        slli t2, t2, 1
+        or t2, t2, t6
+        addi t5, t5, 1 # i++
+        
+        blt t5, t4, reverse_2_loop
     
-    # t3 = right half bit
-    li t6, 32
-    mv t3, a0
-    srai t5, a2, 1
-    sub t5, t6, t5
-    sll t3, t3, t5
-    srl t3, t3, t5
-     
     # compare different
     beq t2, t3, isPalindrome
     li a0, 0
@@ -194,3 +199,4 @@ palindrome_detected:
     isPalindrome:
         li a0, 1
         jr ra
+
